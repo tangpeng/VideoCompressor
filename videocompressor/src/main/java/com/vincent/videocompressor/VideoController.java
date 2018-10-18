@@ -17,9 +17,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
 
 @SuppressLint("NewApi")
 public class VideoController {
@@ -152,11 +149,12 @@ public class VideoController {
 
     /**
      * Background conversion for queueing tasks
+     *
      * @param path source file to compress
      * @param dest destination directory to put result
      */
 
-public void scheduleVideoConvert(String path, String dest) {
+    public void scheduleVideoConvert(String path, String dest) {
         startVideoConvertFromQueue(path, dest);
     }
 
@@ -241,14 +239,15 @@ public void scheduleVideoConvert(String path, String dest) {
     }
 
     /**
-     * Perform the actual video compression. Processes the frames and does the magic
-     * @param sourcePath the source uri for the file as per
-     * @param destinationPath the destination directory where compressed video is eventually saved
+     * 执行视频压缩处理帧
+     *
+     * @param sourcePath      压缩前的文件
+     * @param destinationPath 压缩后的视频文件
      * @return
      */
     @TargetApi(16)
-    public boolean  convertVideo(final String sourcePath, String destinationPath, int quality, CompressProgressListener listener) {
-        this.path=sourcePath;
+    public boolean convertVideo(final String sourcePath, String destinationPath, int quality, CompressProgressListener listener) {
+        this.path = sourcePath;
 
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
         retriever.setDataSource(path);
@@ -275,14 +274,20 @@ public void scheduleVideoConvert(String path, String dest) {
                 bitrate = resultWidth * resultHeight * 30;
                 break;
             case COMPRESS_QUALITY_MEDIUM:
-                resultWidth = originalWidth / 2;
-                resultHeight = originalHeight / 2;
-                bitrate = resultWidth * resultHeight * 10;
+
+//              resultWidth = originalWidth / 2;
+//              resultHeight = originalHeight / 2;
+
+                resultWidth = originalWidth;
+                resultHeight = originalHeight;
+                bitrate = resultWidth * resultHeight *5;
+                Log.i("tangpeng","bitrate="+bitrate);
+
                 break;
             case COMPRESS_QUALITY_LOW:
                 resultWidth = originalWidth / 2;
                 resultHeight = originalHeight / 2;
-                bitrate = (resultWidth/2) * (resultHeight/2) * 10;
+                bitrate = (resultWidth / 2) * (resultHeight / 2) * 10;
                 break;
         }
 
@@ -315,7 +320,6 @@ public void scheduleVideoConvert(String path, String dest) {
             }
         }
 
-
         File inputFile = new File(path);
         if (!inputFile.canRead()) {
             didWriteData(true, true);
@@ -331,9 +335,9 @@ public void scheduleVideoConvert(String path, String dest) {
         if (resultWidth != 0 && resultHeight != 0) {
             MP4Builder mediaMuxer = null;
             MediaExtractor extractor = null;
-
             try {
                 MediaCodec.BufferInfo info = new MediaCodec.BufferInfo();
+                //压缩后的文件配置相关信息
                 Mp4Movie movie = new Mp4Movie();
                 movie.setCacheFile(cacheFile);
                 movie.setRotation(rotationValue);
@@ -431,16 +435,20 @@ public void scheduleVideoConvert(String path, String dest) {
                             }
                             MediaFormat inputFormat = extractor.getTrackFormat(videoIndex);
 
+                            //初始化解码器格式 预设宽高,设置相关参数
                             MediaFormat outputFormat = MediaFormat.createVideoFormat(MIME_TYPE, resultWidth, resultHeight);
+                            //设置帧率
                             outputFormat.setInteger(MediaFormat.KEY_COLOR_FORMAT, colorFormat);
                             outputFormat.setInteger(MediaFormat.KEY_BIT_RATE, bitrate);
                             outputFormat.setInteger(MediaFormat.KEY_FRAME_RATE, 25);
                             outputFormat.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 10);
+
                             if (Build.VERSION.SDK_INT < 18) {
                                 outputFormat.setInteger("stride", resultWidth + 32);
                                 outputFormat.setInteger("slice-height", resultHeight);
                             }
 
+                            // //通过多媒体格式名创建一个可用的解码器
                             encoder = MediaCodec.createEncoderByType(MIME_TYPE);
                             encoder.configure(outputFormat, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
                             if (Build.VERSION.SDK_INT >= 18) {
@@ -455,6 +463,7 @@ public void scheduleVideoConvert(String path, String dest) {
                             } else {
                                 outputSurface = new OutputSurface(resultWidth, resultHeight, rotateRender);
                             }
+                            //crypto:数据加密 flags:编码器/编码器
                             decoder.configure(inputFormat, outputSurface.getSurface(), null, 0);
                             decoder.start();
 
@@ -710,7 +719,7 @@ public void scheduleVideoConvert(String path, String dest) {
         }
         didWriteData(true, error);
 
-        cachedFile=cacheFile;
+        cachedFile = cacheFile;
 
        /* File fdelete = inputFile;
         if (fdelete.exists()) {
@@ -722,9 +731,9 @@ public void scheduleVideoConvert(String path, String dest) {
         }*/
 
         //inputFile.delete();
-        Log.e("ViratPath",path+"");
-        Log.e("ViratPath",cacheFile.getPath()+"");
-        Log.e("ViratPath",inputFile.getPath()+"");
+        Log.e("ViratPath", path + "");
+        Log.e("ViratPath", cacheFile.getPath() + "");
+        Log.e("ViratPath", inputFile.getPath() + "");
 
 
        /* Log.e("ViratPath",path+"");
@@ -750,7 +759,7 @@ public void scheduleVideoConvert(String path, String dest) {
         }
 */
 
-    //    cacheFile.delete();
+        //    cacheFile.delete();
 
        /* try {
            // copyFile(cacheFile,inputFile);
@@ -759,21 +768,17 @@ public void scheduleVideoConvert(String path, String dest) {
         } catch (IOException e) {
             e.printStackTrace();
         }*/
-         // cacheFile.delete();
-       // inputFile.delete();
+        // cacheFile.delete();
+        // inputFile.delete();
         return true;
     }
 
-    public static void copyFile(File src, File dst) throws IOException
-    {
+    public static void copyFile(File src, File dst) throws IOException {
         FileChannel inChannel = new FileInputStream(src).getChannel();
         FileChannel outChannel = new FileOutputStream(dst).getChannel();
-        try
-        {
+        try {
             inChannel.transferTo(1, inChannel.size(), outChannel);
-        }
-        finally
-        {
+        } finally {
             if (inChannel != null)
                 inChannel.close();
             if (outChannel != null)

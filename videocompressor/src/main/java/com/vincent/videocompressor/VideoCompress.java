@@ -29,6 +29,11 @@ public class VideoCompress {
         return task;
     }
 
+    /**
+     *  @dec  开启线程,进行压缩
+     *  @author tangxiaopeng
+     *  @date  2018/10/18 14:45
+     */
     private static class VideoCompressTask extends AsyncTask<String, Float, Boolean> {
         private CompressListener mListener;
         private int mQuality;
