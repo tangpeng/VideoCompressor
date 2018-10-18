@@ -20,6 +20,7 @@ import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+
 /**
  *  @dec  首页
  *  @author tangxiaopeng
@@ -40,7 +41,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
+
     }
 
     @Override
@@ -48,35 +51,33 @@ public class MainActivity extends AppCompatActivity {
         super.onPostCreate(savedInstanceState);
         initView();
     }
-
+    String destPath="";
     private void initView() {
         Button btn_select = (Button) findViewById(R.id.btn_select);
         btn_select.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent();
-                /* 开启Pictures画面Type设定为image */
-                //intent.setType("video/*;image/*");
-                //intent.setType("audio/*"); //选择音频
-                intent.setType("video/*"); //选择视频 （mp4 3gp 是android支持的视频格式）
-                intent.setAction(Intent.ACTION_GET_CONTENT);
-                startActivityForResult(intent, REQUEST_FOR_VIDEO_FILE);
+                addLoacalVideo();
             }
         });
+
+
 
         Button btn_compress = (Button) findViewById(R.id.btn_compress);
         btn_compress.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String destPath = tv_output.getText().toString() + File.separator + "out_VID_" + new SimpleDateFormat("yyyyMMdd_HHmmss", getLocale()).format(new Date()) + ".mp4";
-                VideoCompress.compressVideoLow(tv_input.getText().toString(), destPath, new VideoCompress.CompressListener() {
+                 destPath = tv_output.getText().toString() + File.separator + "out_VID_" + new SimpleDateFormat("yyyyMMdd_HHmmss", getLocale()).format(new Date()) + ".mp4";
+                VideoCompress.compressVideoMedium(tv_input.getText().toString(), destPath, new VideoCompress.CompressListener() {
                     @Override
                     public void onStart() {
+
                         tv_indicator.setText("Compressing..." + "\n"
                                 + "Start at: " + new SimpleDateFormat("HH:mm:ss", getLocale()).format(new Date()));
                         pb_compress.setVisibility(View.VISIBLE);
                         startTime = System.currentTimeMillis();
                         Util.writeFile(MainActivity.this, "Start at: " + new SimpleDateFormat("HH:mm:ss", getLocale()).format(new Date()) + "\n");
+
                     }
 
                     @Override
@@ -90,6 +91,9 @@ public class MainActivity extends AppCompatActivity {
                         Util.writeFile(MainActivity.this, "End at: " + new SimpleDateFormat("HH:mm:ss", getLocale()).format(new Date()) + "\n");
                         Util.writeFile(MainActivity.this, "Total: " + ((endTime - startTime)/1000) + "s" + "\n");
                         Util.writeFile(MainActivity.this);
+
+                        startActivity(new Intent(MainActivity.this,VideoActivity.class).putExtra("vvVideo",destPath));
+
                     }
 
                     @Override
@@ -115,6 +119,19 @@ public class MainActivity extends AppCompatActivity {
         tv_progress = (TextView) findViewById(R.id.tv_progress);
 
         pb_compress = (ProgressBar) findViewById(R.id.pb_compress);
+    }
+
+    private void addLoacalVideo() {
+        Intent intentvideo = new Intent();
+        if (Build.VERSION.SDK_INT < 19) {
+            intentvideo.setAction(Intent.ACTION_GET_CONTENT);
+            intentvideo.setType("video/*");
+        } else {
+            intentvideo.setAction(Intent.ACTION_OPEN_DOCUMENT);
+            intentvideo.addCategory(Intent.CATEGORY_OPENABLE);
+            intentvideo.setType("video/*");
+        }
+        startActivityForResult(Intent.createChooser(intentvideo, "选择要导入的视频"), REQUEST_FOR_VIDEO_FILE);
     }
 
     @Override
