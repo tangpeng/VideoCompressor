@@ -1,6 +1,7 @@
 # 如果您觉得本项目对你有用，请随手star，谢谢
 
-Android 视频压缩其3种方案：(1)FFmpeg,(2)mp4praser,(3)MediaCodec.本demo是用android 自带的MediaCodec 框架
+Android 视频压缩常见3种方案：(1)FFmpeg,(2)mp4praser,(3)MediaCodec.
+本demo是用android 自带的MediaCodec 框架
 
 本人试了一下，一个大小为656M的视频，压缩只要3分钟，可以通过改变分辨率和码率来进行压缩，有进度条提示。如果使用ffmpeg需要大概10分钟左右，而且因为包会比较大。
 
