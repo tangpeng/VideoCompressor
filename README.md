@@ -14,7 +14,8 @@ Android 视频压缩其3种方案：(1)FFmpeg,(2)mp4praser,(3)MediaCodec.本demo
 ![Demo](/pic/Demo.gif)
 
 ###一句代码搞定 可以修改分辨率或者码率
-        VideoCompressTask task = VideoCompress.compressVideoLow(tv_input.getText().toString(), destPath, new VideoCompress.CompressListener() {
+```
+VideoCompressTask task = VideoCompress.compressVideoLow(tv_input.getText().toString(), destPath, new VideoCompress.CompressListener() {
                     @Override
                     public void onStart() {
                         //Start Compress
@@ -35,5 +36,5 @@ Android 视频压缩其3种方案：(1)FFmpeg,(2)mp4praser,(3)MediaCodec.本demo
                         //Progress
                     }
                 });
-
+```
 
