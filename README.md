@@ -1,4 +1,5 @@
 # 如果您觉得本项目对你有用，请随手star，谢谢
+个人主页：https://www.jianshu.com/u/521b2b15caba
 
 Android 视频压缩常见3种方案：(1)FFmpeg,(2)mp4praser,(3)MediaCodec.
 本demo是用android 自带的MediaCodec 框架
